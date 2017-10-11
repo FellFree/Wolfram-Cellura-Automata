@@ -1,0 +1,26 @@
+// Wolfram's Cellura Automata - one root cell
+// Marcin Czerwiński
+// Processing 3.3.6 (Java)
+
+// Inspiration - Daniel Shiffman - https://github.com/shiffman
+
+
+Grid grid; // Initializing object
+int rule; // Holds the actual rule
+
+void setup()
+{
+  size(640, 360);
+  grid = new Grid(); // Create instance of Grid
+  rule = 0; // Set initial rule
+}
+
+void draw()
+{  
+  if (rule < 256) // Rule of Grid object have 8 bits of information so it have 256 possible rules
+  {
+    background(255);
+    grid.run(rule);
+    rule++; 
+  }
+}
