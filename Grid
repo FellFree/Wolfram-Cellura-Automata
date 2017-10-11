@@ -1,0 +1,141 @@
+class Grid {
+
+  int[][] grid; // Main grid, where all cells will be;
+  int[] ruleSet; // Rule - 8 bits of information for commanding one cell with two neighbours
+  int ruleNumber; // Just for information, which rule is applied
+  int generation; // Counter for generation;
+
+  int NoRs; // NoRs - number of rows. Generaly how many generations will be
+  int NoCs; // NoCs - number of collumns. How many columns with cells will be
+
+  Grid() {
+    NoRs = height; // Set number of rows
+    NoCs = width; // Set number of collumns
+    grid = new int[NoRs][NoCs]; // Initialize grid
+  }
+
+  // Main function, to rule over others
+  void run(int rule)
+  {
+    ruleSet = setRule(rule); // Set actual rule
+    ruleNumber = rule; // Just for keeping information in decimal format
+    prepareGrid(); // Preparing grid for CA;
+    generateGrid(); // Make generations of CA;
+    displayGrid(); // Display the outcome
+    saveImage(); // Saves displaied outcome to .jpg file
+  }
+
+  // Returs the int array[8] of rules generated from decimal income 'rule'
+  int[] setRule(int rule)
+  {
+    // Change int value to binary string
+    String sRule = Integer.toBinaryString(rule);
+
+    // ArrayList for rule - temporary;
+    ArrayList<Integer> iRule = new ArrayList<Integer>();
+
+    //Just printinh information
+    //print("Rule: " + rule + " String: " + sRule);
+
+    // Get the character and add int to ArrayList
+    for (int i = 0; i < sRule.length(); i++)
+    {
+      if (sRule.charAt(i) == '1') iRule.add(1);
+      else iRule.add(0);
+    }
+
+    // Not all incoming rules have binary format of 8 bits, so we have to fill missing ones with leading 0's
+    while (iRule.size() < 8)
+    {
+      iRule.add(0, 0);
+    }
+
+    int[] finalRule = new int[iRule.size()]; // Array of finial rules
+
+    // Reverse and fill the finalRule array
+    for (int i = 0; i < iRule.size(); i++)
+    {
+      finalRule[i] = iRule.get(iRule.size() - 1-i); // copy arrayList to int array
+    }
+
+    return finalRule;
+  }
+
+  // Generating entire grid and populate it according to rules
+  void generateGrid()
+  {
+    // Variables to hold values of cells
+    int left, mid, right;
+
+    while (generation < NoRs-1)
+    {
+      generation++;
+      for (int i = 1; i < NoCs -1; i++)
+      {
+        // Clearing variables
+        left = 0; 
+        mid = 0; 
+        right = 0; 
+
+        // Getting inf of states of cells from older generation
+        left  = grid[generation -1][i-1];
+        mid   = grid[generation -1][ i ];
+        right = grid[generation -1][i+1];
+
+        grid[generation][i] = getResult(left, mid, right); // get result according to rules;
+      }
+    }
+  }
+
+  // Use rules to get outcome cell's state
+  int getResult(int a, int b, int c)
+  {
+    String s = "" + a + b + c;
+    int index = Integer.parseInt(s, 2);
+
+    return ruleSet[index];
+  }
+  
+  // Saves the outcome to jpg file
+  void saveImage()
+  {
+    PImage image = createImage(width, height, RGB);
+    
+    loadPixels();
+    image.loadPixels();
+    for(int i = 0; i < NoRs; i++)
+    {
+      for(int j = 0; j < NoCs; j++)
+      {
+        image.pixels[j + (i*NoCs)] = pixels[j + (i*NoCs)];
+      }
+    }
+    image.updatePixels();
+    image.save("Wolfram CA Images/Rule " + ruleNumber + ".jpg");
+    updatePixels();
+  }
+
+  // display 
+  void displayGrid()
+  {
+    loadPixels();
+
+    for (int i = 0; i < NoRs; i++)
+    {
+      for (int j = 0; j < NoCs; j++)
+      {
+        if (grid[i][j] == 1) pixels[j + (i*NoCs)] = color(0);
+        else pixels[j + (i*NoCs)] = color(255);
+      }
+    }
+    updatePixels();
+  }
+
+
+  //just for preparing the grid to use;
+  void prepareGrid()
+  {
+    generation = 0;
+    grid[generation][NoCs/2] = 1;
+  }
+}
